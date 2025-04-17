@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./src/mapCss.css"/>
+    <title>map</title>
+</head>
+<body>
+    <h1>hello</h1>
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="输入搜索内容..." autocomplete="off">
+      <div id="suggestions" class="suggestions hidden"></div>
+    </div>
+    <svg id="map" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet"></svg>
+</body>
+<script>
+    console.log('hello')
+    console.log(localStorage.getItem('userId'))
+
+
+
+    
+    //search
+    const input = document.getElementById('search-input');
+    const suggestionsBox = document.getElementById('suggestions');
+
+    input.addEventListener('input', function () {
+      const query = this.value.trim();
+
+      if (query === '') {
+        suggestionsBox.classList.add('hidden');
+        suggestionsBox.innerHTML = '';
+        return;
+      }
+
+      // 模拟异步请求（可以替换为 fetch）
+      fakeFetchSuggestions(query).then(suggestions => {
+        if (suggestions.length === 0) {
+          suggestionsBox.classList.add('hidden');
+          suggestionsBox.innerHTML = '';
+          return;
+        }
+
+        suggestionsBox.innerHTML = '';
+        suggestions.forEach(item => {
+          const div = document.createElement('div');
+          div.textContent = item;
+          div.classList.add('suggestion-item');
+          div.addEventListener('click', () => {
+            input.value = item;
+            suggestionsBox.classList.add('hidden');
+          });
+          suggestionsBox.appendChild(div);
+        });
+        suggestionsBox.classList.remove('hidden');
+      });
+    });
+
+    // 模拟“请求”返回结果
+    function fakeFetchSuggestions(query) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const allItems = ['苹果', '香蕉', '草莓', '橘子', '菠萝', '葡萄', '哈密瓜', '芒果'];
+          const filtered = allItems.filter(item => item.includes(query));
+          resolve(filtered);
+        }, 300);
+      });
+    }
+
+    // 点击页面其他地方关闭下拉
+    document.addEventListener('click', (e) => {
+      if (!document.querySelector('.search-container').contains(e.target)) {
+        suggestionsBox.classList.add('hidden');
+      }
+    });
+
+    const svg = document.getElementById("map");
+    const viewBox = { x: 0, y: 0, width: 1600, height: 900 };
+    const scaleFactor = 1.1;
+    function updateViewBox() {
+      svg.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+      const zoomRatio = 1600 / viewBox.width;
+      svg.querySelectorAll("path").forEach(p => p.setAttribute("stroke-width", 6 / zoomRatio));
+      svg.querySelectorAll("circle").forEach(c => c.setAttribute("r", 5 / zoomRatio));
+    }
+
+    svg.addEventListener("wheel", e => {
+      e.preventDefault();
+      const scale = e.deltaY < 0 ? (1 / scaleFactor) : scaleFactor;
+      const rect = svg.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const svgX = viewBox.x + (mx / rect.width) * viewBox.width;
+      const svgY = viewBox.y + (my / rect.height) * viewBox.height;
+      viewBox.x = svgX - (svgX - viewBox.x) * scale;
+      viewBox.y = svgY - (svgY - viewBox.y) * scale;
+      viewBox.width *= scale;
+      viewBox.height *= scale;
+      updateViewBox();
+    });
+    let isPanning = false, start = {};
+    svg.addEventListener("mousedown", e => {
+      isPanning = true;
+      start.x = e.clientX;
+      start.y = e.clientY;
+      svg.style.cursor = "grabbing";
+    });
+    svg.addEventListener("mousemove", e => {
+      if (!isPanning) return;
+      const dx = (e.clientX - start.x) * (viewBox.width / svg.clientWidth);
+      const dy = (e.clientY - start.y) * (viewBox.height / svg.clientHeight);
+      viewBox.x -= dx;
+      viewBox.y -= dy;
+      start.x = e.clientX;
+      start.y = e.clientY;
+      updateViewBox();
+    });
+    svg.addEventListener("mouseup", () => { isPanning = false; svg.style.cursor = "grab"; });
+    svg.addEventListener("mouseleave", () => { isPanning = false; svg.style.cursor = "pointer"; });
+    
+    
+</script>
+</html>

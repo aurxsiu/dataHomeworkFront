@@ -1,0 +1,62 @@
+.search-container {
+  position: relative;
+  width: 300px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.suggestion-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+}
+
+.hidden {
+  display: none;
+}
+
+
+
+html, body { margin: 0; overflow: hidden; }
+    svg { width: 100vw; height: 100vh; cursor: grab; user-select: none; display: block;background-color: #00B4CC; }
+    path { fill: none; stroke-linecap: round; }
+    circle { fill: white; stroke: #ccc; stroke-width: 1px; }
+    #controls {
+      position: fixed; top: 10px; left: 10px;
+      z-index: 1000;
+    }
+    button {
+      padding: 6px 10px;
+      margin-right: 8px;
+      background: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    input[type="file"] {
+      display: none;
+    }
