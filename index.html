@@ -1,88 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
-    <link rel="stylesheet" href="./src/myCss.css">
-</head>
-<body>
-  <div class="login-page">
-    <div class="form">
-      <form class="register-form">
-        <input type="text" id="create-name"  placeholder="name"/>
-        <input type="password" id="create-password" placeholder="password"/>
-        <button id="create">create</button>
-        <p class="message">Already registered? <a href="#">Sign In</a></p>
-      </form>
-      <form class="login-form">
-        <input type="text" id="login-username" placeholder="username"/>
-        <input type="password" id="login-password" placeholder="password"/>
-        <button id="login" click="login()">login</button>
-        <p class="message">Not registered? <a href="#">Create an account</a></p>
-      </form>
+    <link rel="stylesheet" href="./src/myCss.css" />
+  </head>
+  <body>
+    <div class="login-page">
+      <div class="form">
+        <form class="register-form">
+          <input type="text" id="create-name" placeholder="name" />
+          <input type="password" id="create-password" placeholder="password" />
+          <button id="create">create</button>
+          <p class="message">Already registered? <a href="#">Sign In</a></p>
+        </form>
+        <form class="login-form">
+          <input type="text" id="login-username" placeholder="username" />
+          <input type="password" id="login-password" placeholder="password" />
+          <button id="login" click="login()">login</button>
+          <p class="message">
+            Not registered? <a href="#">Create an account</a>
+          </p>
+        </form>
+      </div>
     </div>
-  </div>
-</body>
-<script type="module">
-  import $ from 'jquery';
-  $('.message a').click(function(){
-    $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
-  });
-  document.getElementById("login").addEventListener('click',login);
-  document.getElementById("create").addEventListener('click',register);
-  function login(){
-    const UsernameInput = document.getElementById("login-username");
-    const passwordInput = document.getElementById("login-password");
-    let Username = UsernameInput.value;
-    let password = passwordInput.value;
-    console.log(Username+password);
+  </body>
+  <script type="module">
+    import $ from "jquery";
+    $(".message a").click(function () {
+      $("form").animate({ height: "toggle", opacity: "toggle" }, "slow");
+    });
+    document.getElementById("login").addEventListener("click", login);
+    document.getElementById("create").addEventListener("click", register);
+    function login() {
+      const UsernameInput = document.getElementById("login-username");
+      const passwordInput = document.getElementById("login-password");
+      let Username = UsernameInput.value;
+      let password = passwordInput.value;
+      console.log(Username + password);
 
-    fetch('http://localhost:8080/auth/login',
-      {
-        method:'POST',
-        body:JSON.stringify({
-          Username:Username,
-          password:password
+      fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Username: Username,
+          password: password,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data); //id
+          //TODO 逻辑
+          localStorage.setItem("userId", data.id);
+          window.location.href = "./map";
+        });
+    }
+    function register() {
+      const UsernameInput = document.getElementById("create-name");
+      const passwordInput = document.getElementById("create-password");
+      let Username = UsernameInput.value;
+      let password = passwordInput.value;
+      console.log(Username + password);
+
+      fetch("http://localhost:8080/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          Username: Username,
+          password: password,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("网络响应失败");
+          }
+          return response.json();
         })
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error('网络响应失败');
-        }
-        return response.json();
-      }).then(data =>{
-        console.log(data);//id
-        //TODO 逻辑
-        localStorage.setItem("userId",data.id);
-        window.location.href = './map';
-      });
-  }
-  function register(){
-    const UsernameInput = document.getElementById("create-name");
-    const passwordInput = document.getElementById("create-password");
-    let Username = UsernameInput.value;
-    let password = passwordInput.value;
-    console.log(Username+password);
-
-    fetch('http://localhost:8080/auth/register',
-      {
-        method:'POST',
-        body:JSON.stringify({
-          Username:Username,
-          password:password
-        })
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error('网络响应失败');
-        }
-        return response.json();
-      }).then(data =>{
-        console.log(data);//id
-        //TODO 逻辑
-        localStorage.setItem("userId",data.id);
-        window.location.href = './map';
-      });
-  }
-
-</script>
+        .then((data) => {
+          console.log(data); //id
+          //TODO 逻辑
+          localStorage.setItem("userId", data.id);
+          window.location.href = "./map";
+        });
+    }
+  </script>
 </html>
