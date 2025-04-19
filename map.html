@@ -64,11 +64,26 @@
           suggestionsBox.innerHTML = "";
           suggestions.forEach((item) => {
             const div = document.createElement("div");
-            div.textContent = item;
+            div.textContent = item.name;
             div.classList.add("suggestion-item");
+            div.mapType = item.type;
             div.addEventListener("click", () => {
-              input.value = item;
+              input.value = div.textContent;
               suggestionsBox.classList.add("hidden");
+              fetch("http://localhost:8080/map/getMap", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: div.mapType }),
+              })
+                .then((response) => {
+                  return response.json();
+                })
+                .then((data) => {
+                  data = data.map;
+                  nodes = data.nodes;
+                  connections = data.connections;
+                  drawMap();
+                });
             });
             suggestionsBox.appendChild(div);
           });
@@ -83,6 +98,8 @@
       }
     });
 
+    var nodes;
+    var connections;
     //MAP图
     const svg = document.getElementById("map");
     const viewBox = { x: 0, y: 0, width: 1600, height: 900 };
@@ -135,11 +152,42 @@
     });
     svg.addEventListener("mouseup", () => {
       isPanning = false;
-      svg.style.cursor = "grab";
     });
     svg.addEventListener("mouseleave", () => {
       isPanning = false;
-      svg.style.cursor = "pointer";
     });
+
+    function drawMap() {
+      svg.innerHTML = "";
+      for (const conn of connections) {
+        const p1 = nodes.find((n) => n.id === conn[0]);
+        const p2 = nodes.find((n) => n.id === conn[1]);
+        const cx = (p1.x + p2.x) / 2 + (Math.random() - 0.5) * 60;
+        const cy = (p1.y + p2.y) / 2 + (Math.random() - 0.5) * 60;
+        const d = `M${p1.x},${p1.y} Q${cx},${cy} ${p2.x},${p2.y}`;
+        const path = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path"
+        );
+        path.setAttribute("d", d); //贝塞尔曲线
+        path.setAttribute("stroke", `hsl(${Math.random() * 360}, 80%, 60%)`); //颜色
+        path.setAttribute("stroke-width", 6);
+        svg.appendChild(path);
+      }
+      for (const n of nodes) {
+        const c = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle"
+        );
+        c.setAttribute("cx", n.x);
+        c.setAttribute("cy", n.y);
+        c.setAttribute("r", 5);
+        const title = document.createElement("title");
+        title.textContent = n.name;
+        c.appendChild(title);
+        svg.appendChild(c);
+      }
+      updateViewBox();
+    }
   </script>
 </html>
