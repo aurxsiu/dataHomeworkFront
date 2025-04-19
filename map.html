@@ -22,6 +22,7 @@
       viewBox="0 0 1600 900"
       preserveAspectRatio="xMidYMid meet"
     ></svg>
+    <div id="tooltip"></div>
   </body>
   <script>
     console.log("hello");
@@ -102,6 +103,7 @@
     var connections;
     //MAP图
     const svg = document.getElementById("map");
+    const tooltip = document.getElementById("tooltip");
     const viewBox = { x: 0, y: 0, width: 1600, height: 900 };
     const scaleFactor = 1.1;
     function updateViewBox() {
@@ -138,10 +140,21 @@
       isPanning = true;
       start.x = e.clientX;
       start.y = e.clientY;
-      svg.style.cursor = "grabbing";
     });
     svg.addEventListener("mousemove", (e) => {
-      if (!isPanning) return;
+      if (!isPanning) {
+        const target = e.target;
+        const tip = target.getAttribute("data-tip");
+        if (tip) {
+          tooltip.style.display = "block";
+          tooltip.textContent = tip;
+          tooltip.style.left = e.pageX + 10 + "px";
+          tooltip.style.top = e.pageY + 10 + "px";
+        } else {
+          tooltip.style.display = "none";
+        }
+        return;
+      }
       const dx = (e.clientX - start.x) * (viewBox.width / svg.clientWidth);
       const dy = (e.clientY - start.y) * (viewBox.height / svg.clientHeight);
       viewBox.x -= dx;
@@ -182,9 +195,7 @@
         c.setAttribute("cx", n.x);
         c.setAttribute("cy", n.y);
         c.setAttribute("r", 5);
-        const title = document.createElement("title");
-        title.textContent = n.name;
-        c.appendChild(title);
+        c.setAttribute("data-tip", n.name);
         svg.appendChild(c);
       }
       updateViewBox();
