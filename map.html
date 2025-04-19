@@ -28,6 +28,16 @@
     console.log("hello");
     console.log(localStorage.getItem("userId"));
 
+    //伪随机生成
+    Math.seed = 2023;
+    Math.seededRandom = function (max, min) {
+      max = max || 1;
+      min = min || 0;
+      Math.seed = (Math.seed * 9301 + 49297) % 233280;
+      var rnd = Math.seed / 233280.0;
+      return min + rnd * (max - min);
+    };
+
     //search
     const input = document.getElementById("search-input");
     const suggestionsBox = document.getElementById("suggestions");
@@ -102,6 +112,7 @@
     var nodes;
     var connections;
     //MAP图
+    //todo 增加搜索中基于类别搜索的功能
     const svg = document.getElementById("map");
     const tooltip = document.getElementById("tooltip");
     const viewBox = { x: 0, y: 0, width: 1600, height: 900 };
@@ -172,18 +183,19 @@
 
     function drawMap() {
       svg.innerHTML = "";
+      Math.seed = 2023;
       for (const conn of connections) {
         const p1 = nodes.find((n) => n.id === conn[0]);
         const p2 = nodes.find((n) => n.id === conn[1]);
-        const cx = (p1.x + p2.x) / 2 + (Math.random() - 0.5) * 60;
-        const cy = (p1.y + p2.y) / 2 + (Math.random() - 0.5) * 60;
+        const cx = (p1.x + p2.x) / 2 + (Math.seededRandom() - 0.5) * 60;
+        const cy = (p1.y + p2.y) / 2 + (Math.seededRandom() - 0.5) * 60;
         const d = `M${p1.x},${p1.y} Q${cx},${cy} ${p2.x},${p2.y}`;
         const path = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "path"
         );
         path.setAttribute("d", d); //贝塞尔曲线
-        path.setAttribute("stroke", `hsl(${Math.random() * 360}, 80%, 60%)`); //颜色
+        path.setAttribute("stroke", `hsl(147, 50%, 47%)`); //颜色
         path.setAttribute("stroke-width", 6);
         svg.appendChild(path);
       }
