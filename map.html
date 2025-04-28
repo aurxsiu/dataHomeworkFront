@@ -17,6 +17,7 @@
       />
       <div id="suggestions" class="suggestions hidden"></div>
     </div>
+    <button onclick="updateLastNode()">click</button>
     <svg
       id="map"
       viewBox="0 0 1600 900"
@@ -94,6 +95,7 @@
                   nodes = data.nodes;
                   connections = data.connections;
                   drawMap();
+                  mapType = div.mapType;
                 });
             });
             suggestionsBox.appendChild(div);
@@ -109,7 +111,9 @@
       }
     });
 
+    // [int]
     var nodes;
+    //[[node1(int),node2(int),nodeInSvg]]
     var connections;
     //MAP图
     //todo 增加搜索中基于类别搜索的功能
@@ -126,9 +130,9 @@
       svg
         .querySelectorAll("path")
         .forEach((p) => p.setAttribute("stroke-width", 6 / zoomRatio));
-      svg
-        .querySelectorAll("circle")
-        .forEach((c) => c.setAttribute("r", 5 / zoomRatio));
+      // svg
+      //   .querySelectorAll("circle")
+      //   .forEach((c) => c.setAttribute("r", 5 / zoomRatio));
     }
 
     svg.addEventListener("wheel", (e) => {
@@ -183,6 +187,10 @@
 
     function drawMap() {
       svg.innerHTML = "";
+      (startNode = null),
+        (endNode = null),
+        (leastLengthConnections = null),
+        (leastTimeConnections = null);
       Math.seed = 2023;
       for (const conn of connections) {
         const p1 = nodes.find((n) => n.id === conn[0]);
@@ -198,6 +206,7 @@
         path.setAttribute("stroke", `hsl(147, 50%, 47%)`); //颜色
         path.setAttribute("stroke-width", 6);
         svg.appendChild(path);
+        conn[2] = path;
       }
       for (const n of nodes) {
         const c = document.createElementNS(
@@ -208,9 +217,113 @@
         c.setAttribute("cy", n.y);
         c.setAttribute("r", 5);
         c.setAttribute("data-tip", n.name);
+        c.setAttribute("fill", "white");
         svg.appendChild(c);
+        c.nodeId = n.id;
+
+        c.addEventListener("dblclick", () => {
+          if (startNode == null) {
+            startNode = c;
+            startNode.setAttribute("fill", "red");
+          } else if (endNode == null) {
+            endNode = c;
+            endNode.setAttribute("fill", "#010080");
+          } else {
+            alert("清除起点或终点");
+          }
+          if (startNode != null && endNode != null) {
+            set_least_connections();
+          }
+        });
+        // 右键点击事件
+        c.addEventListener("contextmenu", function (event) {
+          if (c == startNode) {
+            leastLengthConnections = null;
+            leastTimeConnections = null;
+            connections.forEach((item) => {
+              let path = item[2];
+              path.setAttribute("stroke", `hsl(147, 50%, 47%)`);
+            });
+
+            event.preventDefault();
+            startNode = null;
+            c.setAttribute("fill", "white");
+          } else if (c == endNode) {
+            leastLengthConnections = null;
+            leastTimeConnections = null;
+            connections.forEach((item) => {
+              let path = item[2];
+              path.setAttribute("stroke", `hsl(147, 50%, 47%)`);
+            });
+
+            event.preventDefault();
+            endNode = null;
+            c.setAttribute("fill", "white");
+          }
+        });
       }
       updateViewBox();
+    }
+
+    //nodeInSvg
+    let startNode = null;
+    //nodeInSvg
+    let endNode = null;
+    //[[int,int]]
+    let leastTimeConnections = [];
+    let leastLengthConnections = [];
+    let mapType;
+
+    function set_least_connections() {
+      fetch("http://localhost:8080/map/getLeastConnections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: mapType,
+          start: startNode.nodeId,
+          end: endNode.nodeId,
+        }),
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          leastTimeConnections = data.leastTimeConnections;
+          leastLengthConnections = data.leastLengthConnections;
+          leastLengthConnections.forEach((item) => {
+            let con = get_con_by_nodes(item[0], item[1]);
+            let path = con[2];
+            path.setAttribute("stroke", `hsl(199, 100%, 55%)`);
+            path.least = 1;
+          });
+          leastTimeConnections.forEach((item) => {
+            let con = get_con_by_nodes(item[0], item[1]);
+            let path = con[2];
+            console.log(path.least);
+            if (path.least == 1) {
+              path.setAttribute("stroke", `hsl(245, 36%, 55%)`);
+              path.least = 3;
+            } else {
+              path.setAttribute("stroke", `hsl(245, 11%, 55%)`);
+              path.least = 2;
+            }
+          });
+        });
+    }
+
+    function get_con_by_nodes(node1, node2) {
+      let result = null;
+      connections.forEach((item) => {
+        if (item[0] == node1 && item[1] == node2) {
+          console.log("get");
+          result = item;
+        }
+      });
+      if (result == null) {
+        alert("bad idea");
+      } else {
+        return result;
+      }
     }
   </script>
 </html>

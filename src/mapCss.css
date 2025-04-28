@@ -55,7 +55,6 @@ path {
   stroke-linecap: round;
 }
 circle {
-  fill: white;
   stroke: #ccc;
   stroke-width: 1px;
 }
