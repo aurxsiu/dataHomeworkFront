@@ -7,7 +7,7 @@
     <title>map</title>
   </head>
   <body>
-    <h1>hello</h1>
+    <h1 id="hello">hello</h1>
     <div class="search-container">
       <input
         type="text"
@@ -17,7 +17,71 @@
       />
       <div id="suggestions" class="suggestions hidden"></div>
     </div>
-    <button onclick="updateLastNode()">click</button>
+    <div id="checkbox-group">
+      <label
+        ><input
+          type="checkbox"
+          name="share"
+          value="restaurant"
+          onchange="showNode('restaurant',this)"
+        />
+        restaurant</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          name="scenic"
+          value="buildings"
+          onchange="showNode('buildings',this)"
+        />
+        buildings</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          name="share"
+          value="wc"
+          onchange="showNode('wc',this)"
+        />
+        wc</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          name="scenic"
+          value="store"
+          onchange="showNode('store',this)"
+        />
+        store</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          name="school"
+          value="教学楼"
+          onchange="showNode('教学楼',this)"
+        />
+        教学楼</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          name="school"
+          value="办公楼"
+          onchange="showNode('办公楼',this)"
+        />
+        办公楼</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          name="school"
+          value="宿舍"
+          onchange="showNode('宿舍',this)"
+        />
+        宿舍</label
+      >
+    </div>
     <svg
       id="map"
       viewBox="0 0 1600 900"
@@ -26,8 +90,83 @@
     <div id="tooltip"></div>
   </body>
   <script>
-    console.log("hello");
+    const hello = document.getElementById("hello");
+    hello.textContent =
+      hello.textContent + " " + localStorage.getItem("username");
+
+    // [{x,y,id,name,type,svg}]
+    var nodes;
+    //[[node1(int),node2(int),nodeInSvg]]
+    var connections;
+    //MAP图
+    //todo 增加搜索中基于类别搜索的功能
+    const svg = document.getElementById("map");
+    const tooltip = document.getElementById("tooltip");
+    const viewBox = { x: 0, y: 0, width: 1600, height: 900 };
+    const scaleFactor = 1.1;
+
+    //nodeInSvg
+    let startNode = null;
+    //nodeInSvg
+    let endNode = null;
+    //[[int,int]]
+    let leastTimeConnections = [];
+    let leastLengthConnections = [];
+    let mapType = null;
+
     console.log(localStorage.getItem("userId"));
+
+    function changeCheckLabel() {
+      const labels = document.querySelectorAll("#checkbox-group label");
+      if (mapType == null) {
+        labels.forEach((item) => {
+          item.hidden = true;
+        });
+      } else if (mapType == 0) {
+        labels.forEach((item) => {
+          const input = item.querySelector("input");
+          if (input.name == "share" || input.name == "scenic") {
+            item.hidden = false;
+          } else {
+            item.hidden = true;
+          }
+        });
+      } else {
+        labels.forEach((item) => {
+          const input = item.querySelector("input");
+          if (input.name == "share" || input.name == "school") {
+            item.hidden = false;
+          } else {
+            item.hidden = true;
+          }
+        });
+      }
+    }
+    function showNode(type, input) {
+      nodes.forEach((item) => {
+        if (item.type == type) {
+          if (input.checked) {
+            item.svg.setAttribute("fill", "black");
+          } else {
+            item.svg.setAttribute("fill", "white");
+          }
+        }
+      });
+    }
+    function showBangonglou() {
+      showNode("办公楼");
+    }
+    function showBuildings() {
+      showNode("");
+    }
+    function showRestaurant() {
+      showNode("restaurant");
+    }
+
+    changeCheckLabel();
+    function test(str) {
+      console.log(str);
+    }
 
     //伪随机生成
     Math.seed = 2023;
@@ -94,8 +233,8 @@
                   data = data.map;
                   nodes = data.nodes;
                   connections = data.connections;
-                  drawMap();
                   mapType = div.mapType;
+                  drawMap();
                 });
             });
             suggestionsBox.appendChild(div);
@@ -111,16 +250,6 @@
       }
     });
 
-    // [int]
-    var nodes;
-    //[[node1(int),node2(int),nodeInSvg]]
-    var connections;
-    //MAP图
-    //todo 增加搜索中基于类别搜索的功能
-    const svg = document.getElementById("map");
-    const tooltip = document.getElementById("tooltip");
-    const viewBox = { x: 0, y: 0, width: 1600, height: 900 };
-    const scaleFactor = 1.1;
     function updateViewBox() {
       svg.setAttribute(
         "viewBox",
@@ -221,6 +350,7 @@
         svg.appendChild(c);
         c.nodeId = n.id;
 
+        n.svg = c;
         c.addEventListener("dblclick", () => {
           if (startNode == null) {
             startNode = c;
@@ -263,16 +393,9 @@
         });
       }
       updateViewBox();
-    }
 
-    //nodeInSvg
-    let startNode = null;
-    //nodeInSvg
-    let endNode = null;
-    //[[int,int]]
-    let leastTimeConnections = [];
-    let leastLengthConnections = [];
-    let mapType;
+      changeCheckLabel();
+    }
 
     function set_least_connections() {
       fetch("http://localhost:8080/map/getLeastConnections", {

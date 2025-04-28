@@ -44,11 +44,17 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          Username: Username,
+          username: Username,
           password: password,
         }),
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("账号密码错误");
+          } else {
+            return response.json();
+          }
+        })
         .then((data) => {
           console.log(data); //id
           //TODO 逻辑
@@ -65,8 +71,9 @@
 
       fetch("http://localhost:8080/auth/register", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          Username: Username,
+          username: Username,
           password: password,
         }),
       })
@@ -80,6 +87,7 @@
           console.log(data); //id
           //TODO 逻辑
           localStorage.setItem("userId", data.id);
+          localStorage.setItem("username", Username);
           window.location.href = "./map";
         });
     }
