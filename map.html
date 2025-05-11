@@ -17,6 +17,7 @@
       />
       <div id="suggestions" class="suggestions hidden"></div>
     </div>
+    <star-rating></star-rating>
     <div id="checkbox-group">
       <label
         ><input
@@ -206,6 +207,11 @@
         })
         .then((data) => {
           const suggestions = data.result;
+          suggestions.sort(function (a, b) {
+            return b.judge - a.judge == 0
+              ? b.popular - a.popular
+              : b.judge - a.judge;
+          });
           if (suggestions.length === 0) {
             suggestionsBox.classList.add("hidden");
             suggestionsBox.innerHTML = "";
@@ -215,16 +221,21 @@
           suggestionsBox.innerHTML = "";
           suggestions.forEach((item) => {
             const div = document.createElement("div");
-            div.textContent = item.name;
+            div.innerHTML =
+              item.name + "&#9;&#9;" + item.judge + "," + item.popular;
             div.classList.add("suggestion-item");
             div.mapType = item.type;
+            div.scenic_name = item.name;
             div.addEventListener("click", () => {
               input.value = div.textContent;
               suggestionsBox.classList.add("hidden");
               fetch("http://localhost:8080/map/getMap", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: div.mapType }),
+                body: JSON.stringify({
+                  type: div.mapType,
+                  name: div.scenic_name,
+                }),
               })
                 .then((response) => {
                   return response.json();
@@ -448,5 +459,11 @@
         return result;
       }
     }
+  </script>
+
+  <script type="module">
+    import { loadComponent } from "./src/js/util";
+    // star-rating
+    await loadComponent("./src/component/star_rating.html");
   </script>
 </html>
