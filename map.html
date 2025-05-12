@@ -17,7 +17,7 @@
       />
       <div id="suggestions" class="suggestions hidden"></div>
     </div>
-    <star-rating></star-rating>
+    <star-rating id="start-rating-component"></star-rating>
     <div id="checkbox-group">
       <label
         ><input
@@ -462,8 +462,12 @@
   </script>
 
   <script type="module">
-    import { loadComponent } from "./src/js/util";
-    // star-rating
-    await loadComponent("./src/component/star_rating.html");
+    import { loadComponent } from "/src/js/util";
+    import { init } from "/src/component/star_rating_component/star_rating_component";
+    await loadComponent(
+      "/src/component/star_rating_component/star_rating.html"
+    );
+
+    init();
   </script>
 </html>

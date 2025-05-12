@@ -3,4 +3,6 @@ export async function loadComponent(url) {
   const html = await res.text();
   const fragment = document.createRange().createContextualFragment(html);
   document.body.appendChild(fragment);
+
+  console.log(document.getElementById("rating"));
 }

@@ -1,0 +1,29 @@
+<template id="star-rating-template">
+  <style>
+    .star-rating {
+      direction: rtl;
+      unicode-bidi: bidi-override;
+      font-size: 10px;
+      user-select: none;
+      display: inline-block;
+    }
+
+    .star-rating span {
+      cursor: pointer;
+      color: lightgray;
+      transition: color 0.2s;
+    }
+
+    .star-rating span.hover,
+    .star-rating span.selected {
+      color: gold;
+    }
+  </style>
+  <div class="star-rating" id="rating">
+    <span data-value="5">&#9733;</span>
+    <span data-value="4">&#9733;</span>
+    <span data-value="3">&#9733;</span>
+    <span data-value="2">&#9733;</span>
+    <span data-value="1">&#9733;</span>
+  </div>
+</template>

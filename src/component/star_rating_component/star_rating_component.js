@@ -1,44 +1,18 @@
-<template id="star-rating-template">
-  <style>
-    .star-rating {
-      direction: rtl;
-      unicode-bidi: bidi-override;
-      font-size: 10px;
-      user-select: none;
-      display: inline-block;
-    }
+var is_init = false;
 
-    .star-rating span {
-      cursor: pointer;
-      color: lightgray;
-      transition: color 0.2s;
-    }
+export async function init() {
+  is_init = true;
 
-    .star-rating span.hover,
-    .star-rating span.selected {
-      color: gold;
-    }
-  </style>
-  <div class="star-rating" id="rating">
-    <span data-value="5">&#9733;</span>
-    <span data-value="4">&#9733;</span>
-    <span data-value="3">&#9733;</span>
-    <span data-value="2">&#9733;</span>
-    <span data-value="1">&#9733;</span>
-  </div>
-</template>
-
-<script type="module">
   class StarRating extends HTMLElement {
     constructor() {
       super();
       const template = document.getElementById("star-rating-template");
       const content = template.content.cloneNode(true);
-      this.attachShadow({ mode: "open" }).appendChild(content);
+      this.appendChild(content);
     }
 
     connectedCallback() {
-      const stars = this.shadowRoot.querySelectorAll("#rating span");
+      const stars = this.querySelectorAll("#rating span");
       let currentRating = 0;
 
       stars.forEach((star) => {
@@ -61,9 +35,10 @@
         });
       });
 
-      this.shadowRoot
-        .getElementById("rating")
-        .addEventListener("mouseleave", resetSelected);
+      this.querySelector("#rating").addEventListener(
+        "mouseleave",
+        resetSelected
+      );
 
       function highlightStars(rating, className) {
         stars.forEach((star) => {
@@ -94,4 +69,4 @@
   }
 
   customElements.define("star-rating", StarRating);
-</script>
+}
