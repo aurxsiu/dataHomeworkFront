@@ -17,7 +17,7 @@
       />
       <div id="suggestions" class="suggestions hidden"></div>
     </div>
-    <star-rating id="start-rating-component"></star-rating>
+    <star-rating id="star-rating"></star-rating>
     <div id="checkbox-group">
       <label
         ><input
@@ -90,7 +90,9 @@
     ></svg>
     <div id="tooltip"></div>
   </body>
-  <script>
+  <script type="module">
+    import { set_map as set_star_rating_map } from "/src/js/star_rating";
+
     const hello = document.getElementById("hello");
     hello.textContent =
       hello.textContent + " " + localStorage.getItem("username");
@@ -179,7 +181,13 @@
       return min + rnd * (max - min);
     };
 
-    //search
+    //
+    //
+    //
+    //
+    //
+    //
+    /* search */
     const input = document.getElementById("search-input");
     const suggestionsBox = document.getElementById("suggestions");
 
@@ -246,6 +254,7 @@
                   connections = data.connections;
                   mapType = div.mapType;
                   drawMap();
+                  set_star_rating_map(div.scenic_name);
                 });
             });
             suggestionsBox.appendChild(div);
@@ -461,13 +470,5 @@
     }
   </script>
 
-  <script type="module">
-    import { loadComponent } from "/src/js/util";
-    import { init } from "/src/component/star_rating_component/star_rating_component";
-    await loadComponent(
-      "/src/component/star_rating_component/star_rating.html"
-    );
-
-    init();
-  </script>
+  <script type="module" src="/src/js/star_rating.js"></script>
 </html>
