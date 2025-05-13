@@ -83,15 +83,21 @@
         宿舍</label
       >
     </div>
+    <div>
+      <button id="mark_editor_trigger">上传日记</button>
+    </div>
     <svg
       id="map"
       viewBox="0 0 1600 900"
       preserveAspectRatio="xMidYMid meet"
     ></svg>
     <div id="tooltip"></div>
+    <mark-editor id="editor"></mark-editor>
+    <h1>end</h1>
   </body>
   <script type="module">
     import { set_map as set_star_rating_map } from "/src/js/star_rating";
+    import { set_trigger as show_mark_editor_trigger } from "/src/js/mark";
 
     const hello = document.getElementById("hello");
     hello.textContent =
@@ -230,7 +236,11 @@
           suggestions.forEach((item) => {
             const div = document.createElement("div");
             div.innerHTML =
-              item.name + "&#9;&#9;" + item.judge + "," + item.popular;
+              item.name +
+              "&#9;&#9;" +
+              (item.judge == null ? -1 : item.judge) +
+              "," +
+              item.popular;
             div.classList.add("suggestion-item");
             div.mapType = item.type;
             div.scenic_name = item.name;
@@ -255,6 +265,7 @@
                   mapType = div.mapType;
                   drawMap();
                   set_star_rating_map(div.scenic_name);
+                  show_mark_editor_trigger(div.scenic_name);
                 });
             });
             suggestionsBox.appendChild(div);
@@ -471,4 +482,5 @@
   </script>
 
   <script type="module" src="/src/js/star_rating.js"></script>
+  <script type="module" src="/src/js/mark.js"></script>
 </html>

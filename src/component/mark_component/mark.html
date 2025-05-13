@@ -1,0 +1,103 @@
+<template id="mark-template">
+  <style>
+    /* 浮动编辑器 */
+    .md-editor-wrapper {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      width: 90%;
+      max-width: 600px;
+      height: 500px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      display: none; /* 初始隐藏 */
+      flex-direction: column;
+    }
+
+    .md-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .md-upload-label {
+      background: #409eff;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .md-body {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      overflow: auto;
+    }
+    .md-input {
+      width: 50%;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: none;
+      box-sizing: border-box;
+      height: 100%;
+    }
+
+    .md-preview {
+      transform-origin: top left; /* ⚠️ 缩放原点为左上角 */
+      display: inline-block; /* ⚠️ 不压缩内容宽度 */
+    }
+    .md-preview img {
+      max-width: 100%;
+      height: auto;
+      display: block; /* 可选：防止图片下方出现额外空白 */
+    }
+
+    .md-frame {
+      width: 50%;
+      padding: 8px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      background-color: #fafafa;
+      overflow: auto; /* ⚠️ 保证内容放大时不会被裁剪 */
+      box-sizing: border-box;
+      height: 100%;
+    }
+    .close-btn {
+      background: #ff4d4f;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+  </style>
+  <div class="md-editor-wrapper" id="editor-popup">
+    <div class="md-toolbar">
+      <label class="md-upload-label">
+        上传图片
+        <input type="file" class="md-upload" style="display: none" />
+      </label>
+      <button class="close-btn" id="close-editor-btn">关闭</button>
+      <button class="close-btn" id="save-btn">保存</button>
+    </div>
+    <div class="md-body">
+      <textarea
+        class="md-input"
+        placeholder="支持 Markdown 格式，支持图片插入"
+      ></textarea>
+      <div class="md-frame">
+        <div class="md-preview"></div>
+      </div>
+    </div>
+  </div>
+</template>
