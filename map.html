@@ -19,6 +19,14 @@
       border-collapse: collapse;
       border-radius: 20%, 20%, 0%, 0%; */
     }
+    .mark_title_head_search {
+      float: left;
+      max-width: 60%;
+    }
+    .mark_title_head_label {
+      float: right;
+      max-width: 40%;
+    }
   </style>
   <body>
     <h1 id="hello">hello</h1>
@@ -109,15 +117,27 @@
     <mark-editor id="editor"></mark-editor>
     <table class="mark-titles-frame">
       <caption class="mark-title-head">
-        Journey
+        <input
+          class="mark_title_head_search"
+          type="text"
+          id="search-mark"
+          placeholder="输入搜索内容..."
+          autocomplete="off"
+        />
+        <label class="mark_title_head_label">Journey</label>
       </caption>
       <tbody id="mark-titles-frame" class="mark-titles-frame"></tbody>
     </table>
+    <div id="mark_titles_tip"></div>
     <h1>end</h1>
   </body>
   <script type="module">
     import { set_map as set_star_rating_map } from "/src/js/star_rating";
     import { set_trigger as show_mark_editor_trigger } from "/src/js/mark";
+    import {
+      setMapName as set_mark_title_mapName,
+      setFilter as set_mark_title_filter,
+    } from "/src/js/mark_titles";
 
     const hello = document.getElementById("hello");
     hello.textContent =
@@ -286,6 +306,7 @@
                   drawMap();
                   set_star_rating_map(div.scenic_name);
                   show_mark_editor_trigger(div.scenic_name);
+                  set_mark_title_mapName(div.scenic_name);
                 });
             });
             suggestionsBox.appendChild(div);
@@ -499,6 +520,14 @@
         return result;
       }
     }
+
+    //searchMarkTitles
+    document
+      .getElementById("search-mark")
+      .addEventListener("input", function () {
+        const query = this.value.trim();
+        set_mark_title_filter(query);
+      });
   </script>
 
   <script type="module" src="/src/js/star_rating.js"></script>

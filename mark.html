@@ -7,11 +7,14 @@
   </head>
   <body>
     <h1 id="title"></h1>
+    <star-rating id="star-rating"></star-rating>
+    <label id="rate_label"></label>
     <div id="show"></div>
   </body>
   <script type="module">
     import { marked } from "marked";
-
+    import { loadComponent } from "/src/js/util";
+    import { init as star_rating_init } from "/src/component/star_rating_component/star_rating_component";
     // 获取 ?user=andres&id=123
     const queryString = window.location.search;
 
@@ -25,10 +28,13 @@
     const head = document.getElementById("title");
     head.textContent = title;
     const show_div = document.getElementById("show");
-
+    const rate_label = document.getElementById("rate_label");
     var ownerId;
     var mapName;
     var rate;
+    function setRate() {
+      rate_label.textContent = rate == null ? "暂无评分" : "评分: " + rate;
+    }
     var click;
 
     fetch("http://localhost:8080/map/getMark", {
@@ -46,6 +52,37 @@
       })
       .then((data) => {
         show_div.innerHTML = marked.parse(data.markContent);
+        ownerId = data.userId;
+        mapName = data.mapName;
+        rate = data.rate;
+        setRate();
+        click = data.click;
       });
+
+    await loadComponent(
+      "/src/component/star_rating_component/star_rating.html"
+    );
+    star_rating_init();
+
+    const star_rating = document.getElementById("star-rating");
+    star_rating.set_click((rate0) => {
+      fetch("http://localhost:8080/map/addMarkRate", {
+        method: "POST",
+
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify({
+          userId: localStorage.getItem("userId"),
+          title: title,
+          rate: rate0,
+        }),
+      })
+        .then((response) => response.text())
+        /* data:rate */
+        .then((data) => {
+          rate = data;
+          setRate();
+        });
+    });
   </script>
 </html>
