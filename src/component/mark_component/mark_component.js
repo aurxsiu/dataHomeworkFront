@@ -10,7 +10,7 @@ class MarkEditor extends HTMLElement {
     this.editor = null;
     this.saveBtn = null;
     this.mark_show = null;
-
+    this.mdTitle = null;
     const template = document.getElementById("mark-template");
     const content = template.content.cloneNode(true);
     this.appendChild(content);
@@ -21,7 +21,7 @@ class MarkEditor extends HTMLElement {
     this.popup = this.querySelector("#editor-popup");
     this.editor = this.querySelector(".md-input");
     this.saveBtn = this.querySelector("#save-btn");
-
+    this.mdTitle = this.querySelector("#title");
     const editor = this.editor;
     const mark_show = this.querySelector(".md-preview");
     const mark_frame = this.querySelector(".md-show");
@@ -109,16 +109,29 @@ class MarkEditor extends HTMLElement {
   }
 
   set_save(save_function) {
-    if (typeof save_function !== "function" || save_function.length != 1) {
+    if (typeof save_function !== "function" || save_function.length != 2) {
       throw Error("错误参数");
     }
 
-    this.saveBtn.addEventListener("click", () => {
+    this.saveBtn.addEventListener("click", async () => {
+      if (this.mdTitle.value == "") {
+        alert("标题!");
+        return;
+      }
+
+      const mdTitle = this.mdTitle.value;
+
+      if (mdTitle.includes("/") || mdTitle.includes("\\")) {
+        alert("标题使用了不寻常的符号!");
+        return;
+      }
       const content = this.editor.value;
-      this.editor.value = "";
-      this.mark_show.innerHTML = "";
-      save_function(content);
-      this.popup.style.display = "none";
+      const result = await save_function(content, mdTitle);
+      if (result) {
+        this.editor.value = "";
+        this.mark_show.innerHTML = "";
+        this.popup.style.display = "none";
+      }
     });
   }
 }

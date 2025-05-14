@@ -38,20 +38,32 @@ async function upload_file(file) {
 }
 
 mark_view.set_upload_function(upload_file);
-mark_view.set_save((content) => {
-  fetch("http://localhost:8080/map/saveMark", {
+mark_view.set_save((content, title) => {
+  return fetch("http://localhost:8080/map/saveMark", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       markContent: content,
       filesUploaded: files_upload,
+      title: title,
+      userId: localStorage.getItem("userId"),
+      mapName: mapName,
     }),
-  }).then((response) => {
-    if (!response.ok) {
-      throw Error("网络错误");
-    }
-    files_upload.splice(0, files_upload.length);
-  });
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw Error("网络错误");
+      }
+      return response.text();
+    })
+    .then((data) => {
+      if (data == "true") {
+        files_upload.splice(0, files_upload.length);
+        return true;
+      }
+      alert("标题重复");
+      return false;
+    });
 });
 export function set_trigger(map_name) {
   trigger_button.hidden = false;
