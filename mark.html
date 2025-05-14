@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1 id="title"></h1>
+    <div id="show"></div>
+  </body>
+  <script type="module">
+    import { marked } from "marked";
+
+    // 获取 ?user=andres&id=123
+    const queryString = window.location.search;
+
+    // 解析查询参数
+    const params = new URLSearchParams(queryString);
+
+    // 获取具体参数
+    const title = params.get("title");
+    console.log(title + " " + localStorage.getItem("userId"));
+
+    const head = document.getElementById("title");
+    head.textContent = title;
+    const show_div = document.getElementById("show");
+
+    var ownerId;
+    var mapName;
+    var rate;
+    var click;
+
+    fetch("http://localhost:8080/map/getMark", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        userId: localStorage.getItem("userId"),
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        show_div.innerHTML = marked.parse(data.markContent);
+      });
+  </script>
+</html>

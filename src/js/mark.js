@@ -1,7 +1,5 @@
-import { marked } from "marked";
 import { loadComponent } from "/src/js/util";
 import { init as mark_component_init } from "/src/component/mark_component/mark_component";
-import { post } from "jquery";
 
 await loadComponent("/src/component/mark_component/mark.html");
 mark_component_init();

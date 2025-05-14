@@ -6,6 +6,20 @@
     <link rel="stylesheet" href="./src/mapCss.css" />
     <title>map</title>
   </head>
+  <style>
+    .mark-titles-frame {
+      width: 100%;
+      overflow: auto;
+    }
+    .mark-title-head {
+      text-align: center;
+      /* font-weight: bold;
+      font-size: large;
+      border: 1px solid rgb(154, 112, 112);
+      border-collapse: collapse;
+      border-radius: 20%, 20%, 0%, 0%; */
+    }
+  </style>
   <body>
     <h1 id="hello">hello</h1>
     <div class="search-container">
@@ -93,6 +107,12 @@
     ></svg>
     <div id="tooltip"></div>
     <mark-editor id="editor"></mark-editor>
+    <table class="mark-titles-frame">
+      <caption class="mark-title-head">
+        Journey
+      </caption>
+      <tbody id="mark-titles-frame" class="mark-titles-frame"></tbody>
+    </table>
     <h1>end</h1>
   </body>
   <script type="module">
@@ -483,4 +503,5 @@
 
   <script type="module" src="/src/js/star_rating.js"></script>
   <script type="module" src="/src/js/mark.js"></script>
+  <script type="module" src="/src/js/mark_titles.js"></script>
 </html>
