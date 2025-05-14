@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <title>地铁图 - 保存/载入 JSON 文件</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #111;
+        overflow: hidden;
+      }
+      svg {
+        width: 100vw;
+        height: 100vh;
+        cursor: grab;
+        user-select: none;
+        display: block;
+      }
+      path {
+        fill: none;
+        stroke-linecap: round;
+      }
+      circle {
+        fill: white;
+        stroke: #ccc;
+        stroke-width: 1px;
+      }
+      #controls {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+      }
+      button {
+        padding: 6px 10px;
+        margin-right: 8px;
+        background: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      input[type="file"] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <button onclick="exportToFile()">保存为 .json</button>
+      <button onclick="document.getElementById('fileInput').click()">
+        从文件读取
+      </button>
+      <button onclick="generateNewMap()">生成新图</button>
+      <input type="file" id="fileInput" accept=".json" />
+    </div>
+    <svg
+      id="map"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid meet"
+    ></svg>
+
+    <script>
+      const svg = document.getElementById("map");
+      const viewBox = { x: 0, y: 0, width: 1600, height: 900 };
+      const scaleFactor = 1.1;
+      let nodes = [],
+        connections = [];
+
+      function updateViewBox() {
+        svg.setAttribute(
+          "viewBox",
+          `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`
+        );
+        const zoomRatio = 1600 / viewBox.width;
+        svg
+          .querySelectorAll("path")
+          .forEach((p) => p.setAttribute("stroke-width", 6 / zoomRatio));
+        svg
+          .querySelectorAll("circle")
+          .forEach((c) => c.setAttribute("r", 5 / zoomRatio));
+      }
+
+      svg.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const scale = e.deltaY < 0 ? 1 / scaleFactor : scaleFactor;
+        const rect = svg.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const svgX = viewBox.x + (mx / rect.width) * viewBox.width;
+        const svgY = viewBox.y + (my / rect.height) * viewBox.height;
+        viewBox.x = svgX - (svgX - viewBox.x) * scale;
+        viewBox.y = svgY - (svgY - viewBox.y) * scale;
+        viewBox.width *= scale;
+        viewBox.height *= scale;
+        updateViewBox();
+      });
+
+      let isPanning = false,
+        start = {};
+      svg.addEventListener("mousedown", (e) => {
+        isPanning = true;
+        start.x = e.clientX;
+        start.y = e.clientY;
+        svg.style.cursor = "grabbing";
+      });
+      svg.addEventListener("mousemove", (e) => {
+        if (!isPanning) return;
+        const dx = (e.clientX - start.x) * (viewBox.width / svg.clientWidth);
+        const dy = (e.clientY - start.y) * (viewBox.height / svg.clientHeight);
+        viewBox.x -= dx;
+        viewBox.y -= dy;
+        start.x = e.clientX;
+        start.y = e.clientY;
+        updateViewBox();
+      });
+      svg.addEventListener("mouseup", () => {
+        isPanning = false;
+        svg.style.cursor = "grab";
+      });
+      svg.addEventListener("mouseleave", () => {
+        isPanning = false;
+        svg.style.cursor = "grab";
+      });
+
+      function distance(a, b) {
+        const dx = a.x - b.x,
+          dy = a.y - b.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      function pairKey(a, b) {
+        return [a.id, b.id].sort().join("-");
+      }
+      function drawMap() {
+        svg.innerHTML = "";
+        for (const conn of connections) {
+          const p1 = nodes.find((n) => n.id === conn[0]);
+          const p2 = nodes.find((n) => n.id === conn[1]);
+          const cx = (p1.x + p2.x) / 2 + (Math.random() - 0.5) * 60;
+          const cy = (p1.y + p2.y) / 2 + (Math.random() - 0.5) * 60;
+          const d = `M${p1.x},${p1.y} Q${cx},${cy} ${p2.x},${p2.y}`;
+          const path = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path"
+          );
+          path.setAttribute("d", d); //贝塞尔曲线
+          path.setAttribute("stroke", `hsl(${Math.random() * 360}, 80%, 60%)`); //颜色
+          path.setAttribute("stroke-width", 6);
+          svg.appendChild(path);
+        }
+        for (const n of nodes) {
+          const c = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+          );
+          c.setAttribute("cx", n.x);
+          c.setAttribute("cy", n.y);
+          c.setAttribute("r", 5);
+          svg.appendChild(c);
+        }
+        updateViewBox();
+      }
+
+      function generateNewMap() {
+        const width = 1600,
+          height = 900;
+        const nodeCount = 100;
+        const extraConnections = 100; //从联通图上增加路线
+        const minDistance = 80;
+        nodes = [];
+        function generateNode() {
+          let tries = 100;
+          while (tries--) {
+            const x = Math.random() * width * 0.9 + width * 0.05;
+            const y = Math.random() * height * 0.9 + height * 0.05;
+            const p = { x, y };
+            if (!nodes.some((n) => distance(n, p) < minDistance)) return p;
+          }
+          return null;
+        }
+        for (let i = 0; i < nodeCount; i++) {
+          const node = generateNode();
+          if (node) {
+            node.id = i;
+            nodes.push(node);
+          }
+        }
+        const edges = [];
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            edges.push({
+              a: nodes[i],
+              b: nodes[j],
+              dist: distance(nodes[i], nodes[j]),
+            });
+          }
+        }
+        edges.sort((e1, e2) => e1.dist - e2.dist);
+        const parent = Array(nodeCount)
+          .fill(0)
+          .map((_, i) => i);
+        function find(i) {
+          return parent[i] === i ? i : (parent[i] = find(parent[i]));
+        }
+        function union(i, j) {
+          const pi = find(i),
+            pj = find(j);
+          if (pi === pj) return false;
+          parent[pi] = pj;
+          return true;
+        }
+        const usedPairs = new Set();
+        connections = [];
+        let count = 0;
+        for (const edge of edges) {
+          if (union(edge.a.id, edge.b.id)) {
+            const key = pairKey(edge.a, edge.b);
+            usedPairs.add(key);
+            connections.push([edge.a.id, edge.b.id]);
+            count++;
+            if (count >= nodeCount - 1) break;
+          }
+        }
+        let extra = extraConnections;
+        for (const edge of edges) {
+          const key = pairKey(edge.a, edge.b);
+          if (!usedPairs.has(key) && extra > 0) {
+            usedPairs.add(key);
+            connections.push([edge.a.id, edge.b.id]);
+            extra--;
+          }
+          if (extra <= 0) break;
+        }
+        console.log(nodes.length);
+        console.log(JSON.stringify(connections));
+        drawMap();
+      }
+
+      function exportToFile() {
+        const data = {
+          nodes: nodes.map((n) => ({ id: n.id, x: n.x, y: n.y })),
+          connections,
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "subway_map.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function (evt) {
+            try {
+              const data = JSON.parse(evt.target.result);
+              nodes = data.nodes;
+              connections = data.connections;
+              drawMap();
+            } catch (err) {
+              alert("文件格式错误！");
+            }
+          };
+          reader.readAsText(file);
+        });
+
+      generateNewMap();
+    </script>
+  </body>
+</html>
