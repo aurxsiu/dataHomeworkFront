@@ -42,68 +42,22 @@
     <star-rating id="star-rating"></star-rating>
     <div id="checkbox-group">
       <label
-        ><input
-          type="checkbox"
-          name="share"
-          value="restaurant"
-          onchange="showNode('restaurant',this)"
-        />
+        ><input type="checkbox" name="share" value="restaurant" />
         restaurant</label
       >
       <label
-        ><input
-          type="checkbox"
-          name="scenic"
-          value="buildings"
-          onchange="showNode('buildings',this)"
-        />
+        ><input type="checkbox" name="scenic" value="buildings" />
         buildings</label
       >
+      <label><input type="checkbox" name="share" value="wc" /> wc</label>
+      <label><input type="checkbox" name="scenic" value="store" /> store</label>
       <label
-        ><input
-          type="checkbox"
-          name="share"
-          value="wc"
-          onchange="showNode('wc',this)"
-        />
-        wc</label
+        ><input type="checkbox" name="school" value="教学楼" /> 教学楼</label
       >
       <label
-        ><input
-          type="checkbox"
-          name="scenic"
-          value="store"
-          onchange="showNode('store',this)"
-        />
-        store</label
+        ><input type="checkbox" name="school" value="办公楼" /> 办公楼</label
       >
-      <label
-        ><input
-          type="checkbox"
-          name="school"
-          value="教学楼"
-          onchange="showNode('教学楼',this)"
-        />
-        教学楼</label
-      >
-      <label
-        ><input
-          type="checkbox"
-          name="school"
-          value="办公楼"
-          onchange="showNode('办公楼',this)"
-        />
-        办公楼</label
-      >
-      <label
-        ><input
-          type="checkbox"
-          name="school"
-          value="宿舍"
-          onchange="showNode('宿舍',this)"
-        />
-        宿舍</label
-      >
+      <label><input type="checkbox" name="school" value="宿舍" /> 宿舍</label>
     </div>
     <div>
       <button id="mark_editor_trigger">上传日记</button>
@@ -139,6 +93,18 @@
       setFilter as set_mark_title_filter,
     } from "/src/js/mark_titles";
 
+    function showTypicalNode(type, input) {
+      nodes.forEach((item) => {
+        if (item.type == type) {
+          if (input.checked) {
+            item.svg.setAttribute("fill", "black");
+          } else {
+            item.svg.setAttribute("fill", "white");
+          }
+        }
+      });
+    }
+
     const hello = document.getElementById("hello");
     hello.textContent =
       hello.textContent + " " + localStorage.getItem("username");
@@ -167,6 +133,16 @@
 
     function changeCheckLabel() {
       const labels = document.querySelectorAll("#checkbox-group label");
+
+      labels.forEach((item) => {
+        const inp = item.children[0];
+        console.log(inp);
+        inp.addEventListener("input", (e) => {
+          console.log(e);
+          showTypicalNode(inp.value, inp);
+        });
+      });
+
       if (mapType == null) {
         labels.forEach((item) => {
           item.hidden = true;
@@ -190,26 +166,6 @@
           }
         });
       }
-    }
-    function showNode(type, input) {
-      nodes.forEach((item) => {
-        if (item.type == type) {
-          if (input.checked) {
-            item.svg.setAttribute("fill", "black");
-          } else {
-            item.svg.setAttribute("fill", "white");
-          }
-        }
-      });
-    }
-    function showBangonglou() {
-      showNode("办公楼");
-    }
-    function showBuildings() {
-      showNode("");
-    }
-    function showRestaurant() {
-      showNode("restaurant");
     }
 
     changeCheckLabel();
